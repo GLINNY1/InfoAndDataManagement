@@ -16,7 +16,7 @@ df = pd.read_excel(file_path, sheet_name="Year 2010-2011")
 # Print rows and columns
 print("Rows and Columns:", df.shape)
 
-
+#Print first 5 rows of data
 print(df.head())
 
 #Column names and data types
@@ -25,7 +25,7 @@ print(df.info())
 #Basic statistics for numeric columns
 print(df.describe())
 
-#Task 2: Data Cleaning
+#Task 1: Data Cleaning
 #Check for missing values
 print("\nMissing values per column:")
 print(df.isna().sum())
@@ -46,3 +46,65 @@ df["TotalPrice"] = df["Quantity"] * df["Price"]
 q_low = np.percentile(df["TotalPrice"], 1)
 q_high = np.percentile(df["TotalPrice"], 99)
 df = df[(df["TotalPrice"] >= q_low) & (df["TotalPrice"] <= q_high)]
+
+#Print after cleaning
+print("\nAfter cleaning, shape:", df.shape)
+
+#Task 2: Time-based Sales Analysis
+# Make sure InvoiceDate is datetime
+df["InvoiceDate"] = pd.to_datetime(df["InvoiceDate"])
+
+# InvoiceMonth
+df["InvoiceMonth"] = df["InvoiceDate"].dt.to_period("M").astype(str)
+
+# InvoiceDay
+df["InvoiceDay"] = df["InvoiceDate"].dt.date
+
+#InvoiceHour
+df["InvoiceHour"] = df["InvoiceDate"].dt.hour
+
+#InvoiceWeekday
+df["Weekday"] = df["InvoiceDate"].dt.day_name()
+
+# Revenue by month
+rev_by_month = df.groupby("InvoiceMonth")["TotalPrice"].sum().sort_index()
+
+# Total revenue per day of week
+rev_by_weekday = df.groupby("Weekday")["TotalPrice"].sum()
+
+# Revenue by hour
+rev_by_hour = df.groupby("InvoiceHour")["TotalPrice"].sum()
+
+# Reorder weekdays to match standard order
+weekday_order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+rev_by_weekday = rev_by_weekday.reindex(weekday_order)
+
+
+# Plot revenue by month
+plt.figure()
+rev_by_month.plot(kind="line")
+plt.title("Total Revenue by Month")
+plt.xlabel("Month")
+plt.ylabel("Revenue (GBP)")
+plt.xticks(rotation=45) # readability purposes
+plt.tight_layout()
+plt.show()
+
+# Plot revenue by day
+plt.figure()
+rev_by_weekday.plot(kind="bar")
+plt.title("Total Revenue by Day of Week")
+plt.xlabel("Day of Week")
+plt.ylabel("Revenue (GBP)")
+plt.xticks(rotation=45) #readability purposes
+plt.tight_layout()
+plt.show()
+
+# Plot revenue by hour
+plt.figure()
+rev_by_hour.plot(kind="bar")
+plt.title("Total Revenue by Hour of Day")
+plt.xlabel("Hour")
+plt.ylabel("Revenue (GBP)") 
+plt.tight_layout()
+plt.show()
