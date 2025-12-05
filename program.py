@@ -108,3 +108,71 @@ plt.xlabel("Hour")
 plt.ylabel("Revenue (GBP)") 
 plt.tight_layout()
 plt.show()
+
+#Task 3: Product-based Sales Analysis
+#Total revenue by product category
+product_rev = df.groupby("Description")["TotalPrice"].sum()
+
+#Total quantity sold by product category
+product_qty = df.groupby("Description")["Quantity"].sum()
+
+#Total number of invoices by product category
+product_invoices = df.groupby("Description")["Invoice"].nunique()
+
+# Top 10 products by revenue
+# breakdown of code: df.groupby("Description")["TotalPrice"].sum() groups the data by the Description column 
+# and then sums the TotalPrice column
+# sort_values(ascending=False) sorts the data in descending order by the TotalPrice column. 
+# head(10) returns the top 10 rows.
+top10_rev = df.groupby("Description")["TotalPrice"].sum().sort_values(ascending=False).head(10)
+
+# same breakdown as above for quantity
+top10_qty = df.groupby("Description")["Quantity"].sum().sort_values(ascending=False).head(10)
+
+
+print("\nTop 10 products by revenue:")
+print(top10_rev)
+
+print("\nTop 10 products by quantity:")
+print(top10_qty)
+
+# Top 10 by revenue (horizontal bar)
+plt.figure(figsize=(10,6))
+top10_rev.plot(kind="barh")
+plt.title("Top 10 Products by Revenue")
+plt.xlabel("Revenue (GBP)")
+plt.ylabel("Product Description")
+plt.gca().invert_yaxis()   # so highest appears at top
+plt.tight_layout()
+plt.show()
+
+# Top 10 by quantity
+plt.figure(figsize=(10,6))
+top10_qty.plot(kind="barh")
+plt.title("Top 10 Products by Quantity Sold")
+plt.xlabel("Quantity Sold")
+plt.ylabel("Product Description")
+plt.gca().invert_yaxis()   # so highest appears at top
+plt.tight_layout()
+plt.show()
+
+#Invoices distribution by product category
+product_invoices = df.groupby("Description")["Invoice"].nunique()
+
+# Top 10 products by revenue (with invoice counts)
+top10_rev_invoices = product_invoices[top10_rev.index]
+top10_qty_invoices = product_invoices[top10_qty.index]
+
+#print top 10 products by revenue (with invoice counts)
+print("\nTop 10 Products by Revenue (with invoice counts):")
+print(pd.DataFrame({
+    "Revenue": top10_rev,
+    "NumInvoices": top10_rev_invoices
+}))
+
+#print top 10 products by quantity (with invoice counts)
+print("\nTop 10 Products by Quantity (with invoice counts):")
+print(pd.DataFrame({
+    "Quantity": top10_qty,
+    "NumInvoices": top10_qty_invoices
+}))
